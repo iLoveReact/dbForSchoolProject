@@ -4,7 +4,7 @@ const getAllHousingAssociation = async () => {
     const result = [];
     const browser = await puppeteer.launch({headless: false});
     const page = await browser.newPage();
-
+    let error = false;
     await page.goto(
     'https://www.samconveyancing.co.uk/news/conveyancing/list-of-housing-associations-in-london-4384',
     {
@@ -13,7 +13,7 @@ const getAllHousingAssociation = async () => {
     });     
     const elements = await page.$$("b");
     let index = 0;
-    writeFile("./csv/houseAssociation.csv", "", (err) => {
+    writeFile("./csv/houseAssociation.csv", "", (err) => { // drop if exists
         console.error(err);
     })
     for (const element of elements){
@@ -23,18 +23,15 @@ const getAllHousingAssociation = async () => {
         appendFile("./csv/houseAssociation.csv",`${++index}, ${value} \n`, (err) => {
             if (err) {
                 browser.close();
-                return {
-                    error: true,
-                    message: "failed to append house Association to the file"
-                };
+                error = true
+                return  console.error("failed to append house Association to the file");
             } 
         })
     }
 
     await browser.close();
     return  {
-        error: false,
-        data: result
-    };
+        error
+    }
 }  
 export default getAllHousingAssociation
