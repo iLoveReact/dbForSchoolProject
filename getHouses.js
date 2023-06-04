@@ -22,7 +22,7 @@ const executeQuery = async (query,error, values = []) => {
 }
 const readNYC = () => {
     const values = []
-    let index = 0;
+    let index = -1;
     const stream = fs.createReadStream("./csv/streetsOfNYC.csv")
     const lineReader = readline.createInterface({
         input:stream
@@ -36,7 +36,7 @@ const readNYC = () => {
         const numberOftenants = Math.floor(Math.random() * 100 + 1)
         const active = Math.floor(Math.random() * 100) //determines whether house is still an active customer
         const record = [++index, stringValues[5], stringValues[7], numberOftenants, active % 2 == 0 ? "T" : "N"]; 
-        if (index !==1) values.push(record);
+        if (index !==0) values.push(record);
     })
     lineReader.on("close", () => {
         createHousesCsv({
@@ -64,24 +64,37 @@ const createHousesCsv = (values) => {
         fs.appendFile("./csv/houses.csv", line.join(",") + "\n", (err) => {
             return console.error(err);
         });
-        
     }
+    let query = `
+    LOAD DATA LOCAL INFILE './csv/houses.csv' 
+    INTO TABLE House FIELDS TERMINATED BY ','
+    (house_id, address, street, tenants, active)
+    `
+    db.query(query, [], (err) => {
+        if (err) return console.error(err);
+        console.log("table house was populated successfully");
+    })
     
 }
 const createDb =  () => {
     let result = executeQuery("DROP DATABASE IF EXISTS schoolProject", "failed to drop the database schoolProject")
     if (result.error) return console.error(result.message)
+
     result = executeQuery("CREATE DATABASE IF NOT EXISTS  schoolProject", "failed to create database");
     if (result.error) return console.error(result.message)
+
     result = executeQuery("USE schoolProject", "failed to use database")
     if (result.error) return console.error(result.message)
+
     result = executeQuery("DROP TABLE IF EXISTS House", "failed to drop the table house")
     if (result.error) return console.error(result.message)
-    result = executeQuery(`CREATE TABLE IF NOT EXIsTS  House (
+
+    result = executeQuery(`CREATE TABLE IF NOT EXISTS  House (
         house_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
         address VARCHAR(80) NOT NULL,
         street VARCHAR(75) NOT NULL,
-        tenants INT NOT NULL 
+        tenants INT NOT NULL,
+        active VARCHAR(1) NOT NULL
     )`, "failed top create a table House");
     if (result.error) return console.error(result.message)
 }
