@@ -55,4 +55,4 @@ const createRelation  = (houseAss, streets) => {
 
     
 }
-createHouseAssociation();
+export default createHouseAssociation;
