@@ -2,7 +2,7 @@ import  puppeteer from "puppeteer";
 import {appendFile, writeFile} from "node:fs"
 const getAllHousingAssociation = async () => {
     const result = [];
-    const browser = await puppeteer.launch({headless: false});
+    const browser = await puppeteer.launch({headless: true});
     const page = await browser.newPage();
     let error = false;
     await page.goto(
@@ -34,4 +34,4 @@ const getAllHousingAssociation = async () => {
         error
     }
 }  
-export default getAllHousingAssociation
+export default getAllHousingAssociation;
