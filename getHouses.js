@@ -1,26 +1,9 @@
-import mysql from "mysql";
+import {db, executeQuery} from "./getDbConnection.js";
 import {appendFile, readSync} from "node:fs"
 import readline from "readline";
 import fs from "fs"
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password:""
-});
-const executeQuery = async (query,error, values = []) => {
-    await db.query(query, [values], (err, result) => {
-        if (err) return {
-            error:true,
-            message: err
-        };
-        
-        return {
-            error: false,
-            data: result            
-        };
-    })
-}
-const readNYC = () => {
+const getHouses = () => {
+    createDb();
     const values = []
     let index = -1;
     const stream = fs.createReadStream("./csv/streetsOfNYC.csv")
@@ -56,11 +39,10 @@ const readNYC = () => {
 }
 const createHousesCsv = (values) => {
     if (values.error) return console.error(values.message);
-    fs.writeFile("./csv/houses.csv","", (err) => {
+    fs.writeFile("./csv/houses.csv","", (err) => { //drop if exists
         console.error(err);
     })
     for (const line of values.data) {
-        console.log(line.join(","));
         fs.appendFile("./csv/houses.csv", line.join(",") + "\n", (err) => {
             return console.error(err);
         });
@@ -71,10 +53,13 @@ const createHousesCsv = (values) => {
     (house_id, address, street, tenants, active)
     `
     db.query(query, [], (err) => {
-        if (err) return console.error(err);
-        console.log("table house was populated successfully");
+        if (err) {
+            error = true;
+            message = err;
+            return console.error(err);
+        }
+
     })
-    
 }
 const createDb =  () => {
     let result = executeQuery("DROP DATABASE IF EXISTS schoolProject", "failed to drop the database schoolProject")
@@ -98,5 +83,4 @@ const createDb =  () => {
     )`, "failed top create a table House");
     if (result.error) return console.error(result.message)
 }
-createDb();
-readNYC();
+export default getHouses;
