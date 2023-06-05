@@ -1,6 +1,6 @@
 import {db, executeQuery} from "./getDbConnection.js";
 import fs from "fs"
-const createHouseAssociation = async (housingAssociations) => {
+const createHouseAssociation = async () => {
     let query = `USE schoolProject`
     let result = await executeQuery(query, "failed to use database")
     query = ` SELECT DISTINCT street FROM HOUSE`;
@@ -29,7 +29,6 @@ const createRelation  = (houseAss, streets) => {
         }
         categorization.push(category);
     }
-    let sum = 0;
     fs.writeFile("./csv/house_Association.csv","", (err) => {
         console.error(err);
     })
@@ -44,9 +43,10 @@ const createRelation  = (houseAss, streets) => {
             for (let houseId of data) {
                 let status = Math.ceil(Math.random() * 100 ) 
                 status = status % 3 == 0 ? false : true;
+                console.log(houseId);
                 if (status) {
                     fs.appendFile("./csv/house_Association.csv", `${houseAssociatioIndex},${houseId.house_id}\n`, (err) => {
-                        if (err) console.error(err);
+                        
                     })
                 }
             }

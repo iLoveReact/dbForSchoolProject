@@ -14,7 +14,7 @@ const getAllHousingAssociation = async () => {
     const elements = await page.$$("b");
     let index = 0;
     writeFile("./csv/houseAssociation.csv", "", (err) => { // drop if exists
-        console.error(err);
+        if (err)console.error(err);
     })
     for (const element of elements){
         const value = await element.evaluate(e => e.textContent)
