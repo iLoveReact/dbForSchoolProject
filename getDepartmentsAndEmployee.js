@@ -5,11 +5,18 @@ import readline from "readline";
 let employeeIndex = 0;
 const getDepartmentsAndEmployees = async () => {
     const {manNames, manLastNames, womenLastNames, womenNames} = await readNames();
+    fs.writeFile("./csv/employee.csv", "", (err) => {
+        console.error(err);
+    })
+    fs.writeFile("./csv/worksIn.csv", "", (err) => {
+        console.error(err);
+    })
     executeQuery(`USE schoolProject`);
     // console.log(some);
     const reader = readline.createInterface({
         input : fs.createReadStream("./csv/deparments.csv"),
     })
+    
     for await (const line of reader) {
         const splited = line.split(", ")
         const availibleJobs = splited[2].replace("[","").replace("]","").split(",")
@@ -27,8 +34,7 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
     let query =  `SELECT * FROM Jobs
             WHERE job_title = '${job}'
     `
-    employeeIndex++;
-    db.query(query, (err, data) => {
+    db.query(query, async (err, data) => {
             if (err) return {error: true};   
             let gender = Math.floor(Math.random() * 100);
             let firstName = "";
@@ -46,12 +52,16 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
             const salary = Math.ceil(Math.random() * diff) + Number(data[0].min_salary);
             console.log(data);
             console.log(salary);
-            createEmployee(firstName, lastName, salary, " ", " ", depId, employeeIndex)
+            await createEmployee(firstName, lastName, salary, " ", " ", depId)
     })
 }
-const createEmployee = (firstName, lastName, salary, hiringDate, firingDate, deparmentIndex, employeeIndex) => {
-    fs.appendFile("./csv/employee.csv", `${firstName},${lastName},${salary},${hiringDate},${firingDate}`,(err) => {
+const createEmployee = async (firstName, lastName, salary, hiringDate, firingDate, deparmentIndex) => {
+    employeeIndex++;
+    fs.appendFile("./csv/employee.csv", `${firstName},${lastName},${salary},${hiringDate},${firingDate}\n`,(err) => {
         if (err) console.error("failed to append to employee.csv")
+    })
+    fs.appendFile("./csv/worksIn.csv", `${employeeIndex},${deparmentIndex}\n`, (err) => {
+        if (err) console.error(err);
     })
 }
 const readNames = async () => {
