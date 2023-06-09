@@ -53,8 +53,8 @@ const getDepartmentsAndEmployees = async () => {
         const availibleJobs = splited[2].replace("[","").replace("]","").split(",")
         for (let job of availibleJobs){ 
             let magicNumber = 8;
-            if (job === "kierowca" || job === "ustawiac śmietników") magicNumber = 25;
-            for (let i = 0 ; i < Math.floor(Math.random() * magicNumber) + 1; i++ ){
+            if (job === "kierowca" || job === "ustawiac śmietników") magicNumber = 35;
+            for (let i = 0 ; i < Math.floor(Math.random() * magicNumber) + 3; i++ ){
                 let query =  `SELECT job_id FROM JOBS WHERE job_title = '${job}'`
                 db.query(query, (err, date) => {
                     if (err) console.error(err)
@@ -66,15 +66,23 @@ const getDepartmentsAndEmployees = async () => {
         }
         
     }
-    let query = `
-    LOAD DATA LOCAL INFILE './csv/employee.csv' 
-    INTO TABLE employees FIELDS TERMINATED BY ','
-    (employee_id, firstname, lastname, salary, hiring_date, firing_date, job_id)
-    `
-    db.query(query, (err, date) => {
-        if (err) return console.error(err)
-        console.log(date);
-    })
+    let query = "USE Schoolproject";
+    await executeQuery(query, "failed to connect to db");
+    query = "DROP TABLE IF EXISTS employees"
+    await executeQuery(query, "failed to drop employees")
+
+    query = `CREATE TABLE IF NOT EXISTS employees (
+        employee_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        firstname VARCHAR(40) NOT NULL,
+        lastname VARCHAR(50) NOT NULL,
+        salary FLOAT NOT NULL,
+        hiring_date VARCHAR(12) NOT NULL,
+        firing_date VARCHAR(12) NULL,
+        job_id INT NOT NULL
+    )`
+    await  executeQuery(query)
+
+
 }
 const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenNames, depId, jobId) => {
     let query =  `SELECT * FROM Jobs
@@ -102,8 +110,8 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
             let firingDate = "";
             let hiringDate = Math.floor(Math.random() * (now - date)) + date
             let randomNumber = Math.floor(Math.random() * 100)
-            if (randomNumber % 4 === 0) firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate).toLocaleString("en-GB").replaceAll("///ig","-").split(",")[0]
-            hiringDate = new Date(hiringDate).toLocaleString("en-GB").replaceAll("///ig","-").split(",")[0];
+            if (randomNumber % 4 === 0) firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate).toLocaleString("en-GB").replaceAll("/","-").split(",")[0]
+            hiringDate = new Date(hiringDate).toLocaleString("en-GB").replaceAll("/","-").split(",")[0];
             await createEmployee(firstName, lastName, salary, hiringDate, firingDate, depId, jobId)
     })
 
