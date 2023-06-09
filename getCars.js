@@ -17,6 +17,12 @@ const createDb = () =>  {
         )
     `
     executeQuery(query, "failed to create car table");
+    query = `
+    LOAD DATA LOCAL INFILE './csv/cars.csv' 
+    INTO TABLE Cars FIELDS TERMINATED BY ','
+    (car_id, model, status, volume)
+    `
+    executeQuery(query, "failed to populate cars");
 }
 const getCars =  async () => {
     const browser = await puppeteer.launch({headless: true});
@@ -49,13 +55,7 @@ const getCars =  async () => {
         
     }
     await browser.close();
-    let query = `
-    LOAD DATA LOCAL INFILE './csv/cars.csv' 
-    INTO TABLE Cars FIELDS TERMINATED BY ','
-    (car_id, model, status, volume)
-    `
-    executeQuery(query, "failed to populate cars");
 
 }
-createDb();
+await createDb();
 getCars();
