@@ -7,6 +7,7 @@ const createDb = () =>  {
     `
     executeQuery(query, "failed to use schoolProject db");
     query = "DROP TABLE IF EXISTS Cars";
+
     executeQuery(query, "failed to drop the table cars")
     query = `
         CREATE TABLE Cars (
@@ -27,7 +28,6 @@ const createDb = () =>  {
 const getCars =  async () => {
     const browser = await puppeteer.launch({headless: true});
     const page = await browser.newPage();
-    let error = false;
     await page.goto(
     'https://mart.ecer.com/lpggastankertruck/c1614735-garbage-compactor-truck?ads=s&am=mart&site=1&adcid=18271609807&adgid=143855231991&loc=1011615&kwd=garbage%20truck%20for%20sale&tid=kwd-187783929&mctp=p&rank=&net=g&gclid=Cj0KCQjw7PCjBhDwARIsANo7CgkmxHf9han5Kp6jJmOsKdiZ2sM3KiEJeBcCgX-9izaRM6MzBJNP0L8aApxFEALw_wcB',
     {
