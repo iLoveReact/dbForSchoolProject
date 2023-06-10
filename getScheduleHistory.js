@@ -118,7 +118,8 @@ const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) =
             //console.log(garbageMan[randomGarbageMan].employee_id, houses[randomHouse].house_id);
             try {
                 
-                await appendFile("./csv/schduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${drivers[randomDriver].employee_id},${houses[randomHouse].house_id},${scheduleId}\n`)
+                await appendFile("./csv/schduleHistory.csv", `${drivers[randomDriver].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
+                await appendFile("./csv/schduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
             }
             catch(error){
                 return console.error(error)
