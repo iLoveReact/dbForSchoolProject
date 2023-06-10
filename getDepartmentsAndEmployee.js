@@ -53,8 +53,13 @@ const getDepartmentsAndEmployees = async () => {
         const availibleJobs = splited[2].replace("[","").replace("]","").split(",")
         for (let job of availibleJobs){ 
             let magicNumber = 8;
-            if (job === "kierowca" || job === "ustawiac śmietników") magicNumber = 35;
-            for (let i = 0 ; i < Math.floor(Math.random() * magicNumber) + 3; i++ ){
+            let aniotherMagicNumber = 3;
+            console.log(job);
+            if (job === "kierowca" || job === "ustawiac smietnikow") {
+                magicNumber = 37;
+                aniotherMagicNumber = 7
+            }
+            for (let i = 0 ; i < Math.floor(Math.random() * magicNumber) + aniotherMagicNumber; i++ ){
                 let query =  `SELECT job_id FROM JOBS WHERE job_title = '${job}'`
                 db.query(query, (err, date) => {
                     if (err) console.error(err)
@@ -76,8 +81,8 @@ const getDepartmentsAndEmployees = async () => {
         firstname VARCHAR(40) NOT NULL,
         lastname VARCHAR(50) NOT NULL,
         salary FLOAT NOT NULL,
-        hiring_date VARCHAR(12) NOT NULL,
-        firing_date VARCHAR(12) NULL,
+        hiring_date DATE,
+        firing_date DATE,
         job_id INT NOT NULL
     )`
     await  executeQuery(query)
@@ -105,13 +110,20 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
             const diff = Number(data[0].max_salary) - Number(data[0].min_salary)
             const salary = Math.ceil(Math.random() * diff) + Number(data[0].min_salary);
             // Min hiring 2019, 9, 12
-            const date = new Date(2019, 9, 12).valueOf()
+            const date = new Date(2019, 5, 12).valueOf()
             const now = new Date().valueOf();
             let firingDate = "";
             let hiringDate = Math.floor(Math.random() * (now - date)) + date
             let randomNumber = Math.floor(Math.random() * 100)
-            if (randomNumber % 4 === 0) firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate).toLocaleString("en-GB").replaceAll("/","-").split(",")[0]
+            if (randomNumber % 4 === 0) {
+                firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate).toLocaleString("en-GB").replaceAll("/","-").split(",")[0]
+                const splited = firingDate.split("-")
+                firingDate = splited[2] + "-" + splited[1] + "-" + splited[0]
+            }
             hiringDate = new Date(hiringDate).toLocaleString("en-GB").replaceAll("/","-").split(",")[0];
+            const splited = hiringDate.split("-")
+            hiringDate = splited[2] + "-" + splited[1] + "-" + splited[0]
+            console.log(hiringDate);
             await createEmployee(firstName, lastName, salary, hiringDate, firingDate, depId, jobId)
     })
 

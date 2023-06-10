@@ -81,13 +81,13 @@ const getEmployees = async (obtainedData) => {
 const ObtainEmployees = (date, usedCars, scheduleId, houses) => {
     let query = `
     SELECT * FROM employees
-    WHERE hiring_date <= '${date}' AND (firing_date = "" OR firing_date > '${date}') AND job_id = 4 
+    WHERE hiring_date <= '${date}' AND (firing_date = "0000-00-00" OR firing_date > '${date}') AND job_id = 4 
     `// fetch id from jobs insted of hard coded later
     db.query(query, (err, drivers) => {
         if (err) return console.error(err)
         query = `
         SELECT * FROM employees
-        WHERE hiring_date <= '${date}' AND (firing_date = "" OR firing_date > '${date}') AND job_id = 5 
+        WHERE hiring_date <= '${date}' AND (firing_date = "0000-00-00" OR firing_date > '${date}') AND job_id = 5
         `
         console.log(query);
         db.query(query, (err, garbageMan) => {
@@ -118,7 +118,8 @@ const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) =
             //console.log(garbageMan[randomGarbageMan].employee_id, houses[randomHouse].house_id);
             try {
                 
-                await appendFile("./csv/schduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${drivers[randomDriver].employee_id},${houses[randomHouse].house_id},${scheduleId}\n`)
+                await appendFile("./csv/schduleHistory.csv", `${drivers[randomDriver].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
+                await appendFile("./csv/schduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
             }
             catch(error){
                 return console.error(error)

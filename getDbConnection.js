@@ -5,8 +5,8 @@ export const db = mysql.createConnection({
     password:""
 });
 
-export const executeQuery = async (query, errorMessage, values = []) => {
-    db.query(query, [values], (err, result) => {
+export const executeQuery = async (query, errorMessage) => {
+    db.query(query, (err, result) => {
         if (err) console.error(err);
     })
     

@@ -2,14 +2,16 @@ import fs from "fs";
 import { db,executeQuery } from "./getDbConnection.js"
 const  getSchedule = () => {
     createDb();
-    let startDate = new Date(2019, 11, 12);
+    let startDate = new Date(2019, 11, 29);
     let index = 0;
     const endDate = new Date();
     fs.writeFile("./csv/schedule.csv", "" , (err) => {
         if (err) console.error("failed to drop a schedule.csv", err)
     })
     while (startDate < endDate) {
-        fs.appendFileSync("./csv/schedule.csv", `${++index},${startDate.toLocaleString("en-GB").replaceAll("///ig","-").split(",")[0]}\n`, (err) => {
+        const splited = startDate.toLocaleString("en-GB").replaceAll("/","-").split(",")[0].split("-")
+        const date = splited[2] + "-" + splited[1] + "-" + splited[0];
+        fs.appendFileSync("./csv/schedule.csv", `${++index},${date}\n`, (err) => {
             if (err) console.error("failed to write schedule.csv", err);
         })
         startDate.setDate(startDate.getDate() + 20);
@@ -26,7 +28,7 @@ const createDb = () => {
 
     query = `CREATE TABLE Schedule (
         schedule_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-        date VARCHAR(45) NOT NULL 
+        date VARCHAR(23) 
     )`
     executeQuery(query, "failed to create table Schedule");
 
