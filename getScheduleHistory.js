@@ -101,23 +101,26 @@ const ObtainEmployees = (date, usedCars, scheduleId, houses) => {
 const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) => {
     const usedEmployees = [];
     const usedHouses  = [];
+
     for (const car of usedCars) {
-        //console.log("another car");
         let randomDriver = Math.floor(Math.random() * drivers.length)
         let randomGarbageMan = Math.floor(Math.random() * garbageMan.length)
-        while (usedEmployees.includes(drivers[randomDriver].employee_id)) randomDriver = Math.floor(Math.random() * drivers.length);
-        while (usedEmployees.includes(garbageMan[randomGarbageMan].employee_id)) randomGarbageMan = Math.floor(Math.random() * garbageMan.length);
+        
+        while (usedEmployees.includes(drivers[randomDriver].employee_id)) 
+            randomDriver = Math.floor(Math.random() * drivers.length);
+        
+        while (usedEmployees.includes(garbageMan[randomGarbageMan].employee_id))
+            randomGarbageMan = Math.floor(Math.random() * garbageMan.length);
+
         usedEmployees.push(drivers[randomDriver].employee_id)
         usedEmployees.push(garbageMan[randomGarbageMan].employee_id)
         const randomNumberOfHouses = Math.floor(Math.random() * houses.length)
+
         for (let index = 0; index < randomNumberOfHouses; index++){
             let randomHouse = Math.floor(Math.random() * houses.length)
             while (usedHouses.includes(randomHouse)) randomHouse = Math.floor(Math.random() * houses.length)
-            //console.log(scheduleId, randomDriver, randomGarbageMan, randomHouse, car);
 
-            //console.log(garbageMan[randomGarbageMan].employee_id, houses[randomHouse].house_id);
-            try {
-                
+            try {    
                 await appendFile("./csv/schduleHistory.csv", `${drivers[randomDriver].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
                 await appendFile("./csv/schduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
             }

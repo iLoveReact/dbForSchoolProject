@@ -7,9 +7,9 @@ const createHouseAssociation = async () => {
 
     query = ` SELECT DISTINCT street FROM HOUSE`;
     db.query(query, (err, res) => {
-        if (err) return console.error(err);
+        if (err) return console.error(err); //ult
         fs.readFile("./csv/houseAssociation.csv", "utf8", (err, data) => {
-            if (err) return console.error(err);
+            if (err) return console.error(err); //ult
             createRelation(data.split("\n"), res);
          })    
 

@@ -7,16 +7,17 @@ const createDb = async () => {
     let query = "USE Schoolproject";
     await executeQuery(query, "failed to connect to db");
 
-    query = "DROP TABLE IF  EXISTS departments"
-    await executeQuery(query, "failed to drop depaetmenst")
+    query = "DROP TABLE IF  EXISTS departments";
+    await executeQuery(query, "failed to drop depaetmenst");
 
     query = `CREATE TABLE IF NOT EXISTS departments (
         dep_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
         dep_name VARCHAR(30) NOT NULL
-    )`
-    await  executeQuery(query, "failed to create departments table")
-    query = "DROP TABLE IF EXISTS employees"
-    await executeQuery(query, "failed to drop employees")
+    )`;
+    await executeQuery(query, "failed to create departments table");
+
+    query = "DROP TABLE IF EXISTS employees";
+    await executeQuery(query, "failed to drop employees");
 
     query = `CREATE TABLE IF NOT EXISTS employees (
         employee_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -26,55 +27,11 @@ const createDb = async () => {
         hiring_date VARCHAR(12) NOT NULL,
         firing_date VARCHAR(12) NULL,
         job_id INT NOT NULL
-    )`
-    await  executeQuery(query)
-
-}
-const getDepartmentsAndEmployees = async () => {
-    await createDb()
-    const {manNames, manLastNames, womenLastNames, womenNames} = await readNames();
-    fs.writeFile("./csv/employee.csv", "", (err) => {
-        console.error(err);
-    })
-    fs.writeFile("./csv/worksIn.csv", "", (err) => {
-        console.error(err);
-    })
-    executeQuery(`USE schoolProject`);
-    const reader = readline.createInterface({
-        input : fs.createReadStream("./csv/deparments.csv"),
-    })
+    )`;
+    await executeQuery(query);
     
-    for await (const line of reader) {
-        const splited = line.split(", ")
-        let query =  `INSERT INTO departments (dep_id, dep_name) VALUES (?)`
-        db.query(query,[[splited[0],splited[1]]], (err) => {
-            if (err) console.error(err)
-        })
-        const availibleJobs = splited[2].replace("[","").replace("]","").split(",")
-        for (let job of availibleJobs){ 
-            let magicNumber = 8;
-            let aniotherMagicNumber = 3;
-            console.log(job);
-            if (job === "kierowca" || job === "ustawiac smietnikow") {
-                magicNumber = 37;
-                aniotherMagicNumber = 7
-            }
-            for (let i = 0 ; i < Math.floor(Math.random() * magicNumber) + aniotherMagicNumber; i++ ){
-                let query =  `SELECT job_id FROM JOBS WHERE job_title = '${job}'`
-                db.query(query, (err, date) => {
-                    if (err) console.error(err)
-                    getJobDetails(job, manNames, manLastNames, womenLastNames, womenNames, splited[0], date[0].job_id);
-                })
-                
-            }
-            
-        }
-        
-    }
-    let query = "USE Schoolproject";
-    await executeQuery(query, "failed to connect to db");
-    query = "DROP TABLE IF EXISTS employees"
-    await executeQuery(query, "failed to drop employees")
+    query = "DROP TABLE IF EXISTS employees";
+    await executeQuery(query, "failed to drop employees");
 
     query = `CREATE TABLE IF NOT EXISTS employees (
         employee_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -84,64 +41,122 @@ const getDepartmentsAndEmployees = async () => {
         hiring_date DATE,
         firing_date DATE,
         job_id INT NOT NULL
-    )`
-    await  executeQuery(query)
+    )`;
+    await executeQuery(query);
+
+}
+const getDepartmentsAndEmployees = async () => {
+    await createDb()
+    const { manNames, manLastNames, womenLastNames, womenNames } = await readNames();
+
+    fs.writeFile("./csv/employee.csv", "", (err) => {
+        console.error(err);
+    })
+    fs.writeFile("./csv/worksIn.csv", "", (err) => {
+        console.error(err);
+    })
+
+    executeQuery(`USE schoolProject`, "failed to use schoolPero");
+    const reader = readline.createInterface({
+        input: fs.createReadStream("./csv/deparments.csv"),
+    })
+
+    for await (const line of reader) {
+        const splited = line.split(", ");
+        let query = `INSERT INTO departments (dep_id, dep_name) VALUES (?)`;
+        
+        db.query(query, [[splited[0], splited[1]]], (err) => {
+            if (err) return console.error(err); // add ultimate error
+            const availibleJobs = splited[2].replace("[", "").replace("]", "").split(",");
+            return startGeneration(availibleJobs, data, manLastNames, manNames, womenLastNames, womenNames. splited) // change to object for easie error handling
+        })
+    }
 
 
 }
-const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenNames, depId, jobId) => {
-    let query =  `SELECT * FROM Jobs
-            WHERE job_title = '${job}'
-    `
-    db.query(query, async (err, data) => {
-            if (err) return {error: true};   
-            let gender = Math.floor(Math.random() * 100);
-            let firstName = "";
-            let lastName = "";
+const startGeneration = (availibleJobs, data, manLastNames, manNames, womenLastNames, womenNames, splited) => {
+    for (let job of availibleJobs) {
+        let magicNumber = 8;
+        let anotherMagicNumber = 3;
+        
+        if (job === "kierowca" || job === "ustawiac smietnikow") {
+            magicNumber = 37;
+            anotherMagicNumber = 7;
+        }
+
+        for (let i = 0; i < Math.floor( Math.random() * magicNumber ) + anotherMagicNumber; i++) {
+            let query = `SELECT job_id FROM JOBS WHERE job_title = '${job}'`;
             
-            if (gender % 2 == 0){
-                firstName = manNames[Math.floor(Math.random() * manNames.length)].split(",")[0];
-                lastName = manLastNames[Math.floor(Math.random() * manLastNames.length)].split(",")[0];
-            }
-            else {
-                firstName = womenNames[Math.floor(Math.random() * womenNames.length)].split(",")[0];
-                lastName = womenLastNames[Math.floor(Math.random() * womenLastNames.length)].split(",")[0];
-            }
-            const diff = Number(data[0].max_salary) - Number(data[0].min_salary)
-            const salary = Math.ceil(Math.random() * diff) + Number(data[0].min_salary);
-            // Min hiring 2019, 9, 12
-            const date = new Date(2019, 5, 12).valueOf()
-            const now = new Date().valueOf();
-            let firingDate = "";
-            let hiringDate = Math.floor(Math.random() * (now - date)) + date
-            let randomNumber = Math.floor(Math.random() * 100)
-            if (randomNumber % 4 === 0) {
-                firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate).toLocaleString("en-GB").replaceAll("/","-").split(",")[0]
-                const splited = firingDate.split("-")
-                firingDate = splited[2] + "-" + splited[1] + "-" + splited[0]
-            }
-            hiringDate = new Date(hiringDate).toLocaleString("en-GB").replaceAll("/","-").split(",")[0];
-            const splited = hiringDate.split("-")
-            hiringDate = splited[2] + "-" + splited[1] + "-" + splited[0]
-            console.log(hiringDate);
-            await createEmployee(firstName, lastName, salary, hiringDate, firingDate, depId, jobId)
+            db.query(query, (err, data) => {
+                if (err) console.error(err); // ultimate error 
+                getJobDetails(job, manNames, manLastNames, womenLastNames, womenNames, splited[0], data[0].job_id);
+            })
+
+        }
+
+    }
+}
+const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenNames, depId, jobId) => {
+    let query = `SELECT * FROM Jobs
+            WHERE job_title = '${job}'
+    `;
+    db.query(query, async (err, data) => {
+        if (err) return console.error(err); //ultimate error handler 
+        let gender = Math.floor(Math.random() * 100);
+        let firstName = "";
+        let lastName = "";
+
+        if (gender % 2 == 0) {
+            firstName = manNames[Math.floor(Math.random() * manNames.length)].split(",")[0];
+            lastName = manLastNames[Math.floor(Math.random() * manLastNames.length)].split(",")[0];
+        } else {
+            firstName = womenNames[Math.floor(Math.random() * womenNames.length)].split(",")[0];
+            lastName = womenLastNames[Math.floor(Math.random() * womenLastNames.length)].split(",")[0];
+        }
+
+        const diff = Number(data[0].max_salary) - Number(data[0].min_salary);
+        const salary = Math.ceil(Math.random() * diff) + Number(data[0].min_salary);
+        const date = new Date(2019, 5, 12).valueOf();
+        const now = new Date().valueOf();
+        let firingDate = "";
+        let hiringDate = Math.floor(Math.random() * (now - date)) + date;
+        let randomNumber = Math.floor(Math.random() * 100);
+
+        if (randomNumber % 4 === 0) {
+            firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate);
+            firingDate = firingDate.toLocaleString("en-GB").replaceAll("/", "-").split(",")[0];
+            const splited = firingDate.split("-");
+            firingDate = splited[2] + "-" + splited[1] + "-" + splited[0];
+        }
+
+        hiringDate = new Date(hiringDate).toLocaleString("en-GB");
+        hiringDate = hiringDate.replaceAll("/", "-").split(",")[0];
+        const splited = hiringDate.split("-");
+        hiringDate = splited[2] + "-" + splited[1] + "-" + splited[0];
+        await createEmployee(firstName, lastName, salary, hiringDate, firingDate, depId, jobId);
     })
 
 }
 const createEmployee = async (firstName, lastName, salary, hiringDate, firingDate, deparmentIndex, jobId) => {
     employeeIndex++;
-    fs.appendFile("./csv/employee.csv", `${employeeIndex},${firstName},${lastName},${salary}, ${hiringDate},${firingDate},${jobId}\n`,(err) => {
-        if (err) console.error("failed to append to employee.csv")
+    fs.appendFile("./csv/employee.csv", `${employeeIndex},${firstName},${lastName},${salary},${hiringDate},${firingDate},${jobId}\n`, (err) => {
+        if (err) console.error("failed to append to employee.csv"); //ultiamte error
     })
     fs.appendFile("./csv/worksIn.csv", `${employeeIndex},${deparmentIndex}\n`, (err) => {
-        if (err) console.error(err);
+        if (err) console.error(err); // ultimate error
     })
 }
+
 const readNames = async () => {
-    const manNames = (await readFile("./csv/8_-_WYKAZ_IMION_MĘSKICH_OSÓB_ŻYJĄCYCH_WG_POLA_IMIĘ_PIERWSZE_WYSTĘPUJĄCYCH_W_REJESTRZE_PESEL_BEZ_ZGONÓW.csv","utf8")).toString().split("\n")
-    const womenNames = (await readFile("./csv/8_-_WYKAZ_IMION_ŻEŃSKICH_OSÓB_ŻYJĄCYCH_WG_POLA_IMIĘ_PIERWSZE_WYSTĘPUJĄCYCH_W_REJESTRZE_PESEL_BEZ_ZGONÓW.csv", "utf8")).toString().split("\n")
-    const manLastNames = (await readFile("./csv/nazwiska_męskie-osoby_żyjące.csv", "utf8")).toString().split("\n")
-    const womenLastNames = (await readFile("./csv/nazwiska_żeńskie-osoby_żyjące.csv", "utf8")).toString().split("\n");
+    const pathManNames = "./csv/8_-_WYKAZ_IMION_MĘSKICH_OSÓB_ŻYJĄCYCH_WG_POLA_IMIĘ_PIERWSZE_WYSTĘPUJĄCYCH_W_REJESTRZE_PESEL_BEZ_ZGONÓW.csv";
+    const pathWomenNames = "./csv/8_-_WYKAZ_IMION_ŻEŃSKICH_OSÓB_ŻYJĄCYCH_WG_POLA_IMIĘ_PIERWSZE_WYSTĘPUJĄCYCH_W_REJESTRZE_PESEL_BEZ_ZGONÓW.csv";
+    const pathManLastNames = "./csv/nazwiska_męskie-osoby_żyjące.csv";
+    const pathWomenLastNames = "./csv/nazwiska_żeńskie-osoby_żyjące.csv";
+    const manNames = (await readFile(pathManNames, "utf8")).toString().split("\n")
+    const womenNames = (await readFile(pathWomenNames, "utf8")).toString().split("\n")
+    const manLastNames = (await readFile(pathManLastNames, "utf8")).toString().split("\n")
+    const womenLastNames = (await readFile(pathWomenLastNames, "utf8")).toString().split("\n");
+    
     return {
         manNames,
         womenNames,
@@ -149,4 +164,5 @@ const readNames = async () => {
         womenLastNames
     }
 }
+
 getDepartmentsAndEmployees();

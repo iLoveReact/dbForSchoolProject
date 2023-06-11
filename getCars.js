@@ -48,14 +48,14 @@ const getCars =  async () => {
     for (const title of titles) {
 
         const model = await title.evaluate(t => t.textContent.trim().replace(",",""));
-        const volume = Math.floor(Math.random() * 5001); // 5 tons is the max for the truck
+        const volume = Math.floor(Math.random() * 5001) + 3000; // 8 tons is the max for the truck
         
         for (let i = 0; i < Math.ceil(Math.random() * 3) + 1; i++) {
             let status = Math.floor(Math.random() * 100);
-            status = status % 2 == 0 ? "T" : "N"; // deceding whether it is availible at the moment or not
+            status = status % 2 == 0 ? "T" : "N"; // deciding whether it is availible at the moment or not
             
             fs.appendFile(
-                "./csv/cars.csv", `${++index},${model},${status},${volume + 3000}\n`, (err) => {
+                "./csv/cars.csv", `${++index},${model},${status},${volume}\n`, (err) => {
                     console.error(err);
                 }
             )
