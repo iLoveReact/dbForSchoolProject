@@ -1,15 +1,16 @@
 import { db, executeQuery } from "./getDbConnection.js";
 import fs from "fs";
+import raiseAnError from "./utils/raiseAnError.js";
 
-const createHouseAssociation = async () => {
+const getAnAssociationForHouse = async () => {
     let query = `USE schoolProject`;
     await executeQuery(query, "failed to use database");
 
     query = ` SELECT DISTINCT street FROM HOUSE`;
     db.query(query, (err, res) => {
-        if (err) return console.error(err); //ult
+        if (err) return raiseAnError(err);
         fs.readFile("./csv/houseAssociation.csv", "utf8", (err, data) => {
-            if (err) return console.error(err); //ult
+            if (err) return raiseAnError(err);
             createRelation(data.split("\n"), res);
          })    
 
@@ -32,8 +33,8 @@ const createRelation = (houseAss, streets) => {
         }
         categorization.push(category);
     }
-    fs.writeFile("./csv/house_Association.csv","", (err) => { // analogy of drop if exists
-        console.error(err);
+    fs.writeFile("./csv/house_Association.csv","", (err) => { //drop 
+        return console.error(err);
     })
     for (let index = 0; index < categorization.length; index++){
         let query = `
@@ -41,7 +42,7 @@ const createRelation = (houseAss, streets) => {
         WHERE street in ?
         `;
         db.query(query, [[categorization[index]]], (err, data) => {
-            if (err) console.error(err);
+            if (err) return raiseAnError(err);
             const houseAssociatioIndex = index + 1;
 
             for (let houseId of data) {
@@ -50,7 +51,9 @@ const createRelation = (houseAss, streets) => {
 
                 if (status) {
                     fs.appendFile("./csv/house_Association.csv", `${houseAssociatioIndex},${houseId.house_id}\n`, (err) => {
-                        if (err) return console.error(err);
+                        
+                        if (err) 
+                            return console.error(err);
                     })
                 }
             }
@@ -59,4 +62,4 @@ const createRelation = (houseAss, streets) => {
 
     
 }
-export default createHouseAssociation;
+export default getAnAssociationForHouse;

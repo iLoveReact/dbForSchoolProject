@@ -1,6 +1,7 @@
 import fs from "fs";
 import puppeteer from "puppeteer";
 import { db, executeQuery } from "./getDbConnection.js";
+import raiseAnError from "./utils/raiseAnError.js";
 
 const createDb = async () =>  {
     let query = `USE schoolProject`;
@@ -19,16 +20,10 @@ const createDb = async () =>  {
     `;
     await executeQuery(query, "failed to create car table");
 
-    query = `
-    LOAD DATA LOCAL INFILE './csv/cars.csv' 
-    INTO TABLE Cars FIELDS TERMINATED BY ','
-    (car_id, model, status, volume)
-    `
-    await executeQuery(query, "failed to populate cars");
 }
 
 const getCars =  async () => {
-    createDb();
+    await createDb();
     let index = 0;
     const browser = await puppeteer.launch({headless: true});
     const page = await browser.newPage();
@@ -42,7 +37,7 @@ const getCars =  async () => {
 
     const titles = await page.$$(".product-component__title");
     fs.writeFile("./csv/cars.csv", "", (err) => {
-        console.error(err);
+        if (err) return raiseAnError(err);
     });
 
     for (const title of titles) {
@@ -56,13 +51,18 @@ const getCars =  async () => {
             
             fs.appendFile(
                 "./csv/cars.csv", `${++index},${model},${status},${volume}\n`, (err) => {
-                    console.error(err);
+                    if (err) raiseAnError(err);
                 }
             )
         }
         
     }
+    let query = `
+    LOAD DATA LOCAL INFILE './csv/cars.csv' 
+    INTO TABLE Cars FIELDS TERMINATED BY ','
+    (car_id, model, status, volume)
+    `
+    await executeQuery(query, "failed to populate cars");
     await browser.close();
-
 }
-getCars();
+export default getCars;
