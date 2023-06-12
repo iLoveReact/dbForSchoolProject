@@ -1,4 +1,5 @@
 import mysql from "mysql"
+import raiseAnError from "./utils/raiseAnError.js";
 export const db = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -6,8 +7,8 @@ export const db = mysql.createConnection({
 });
 
 export const executeQuery = async (query, errorMessage) => {
-    db.query(query, (err, result) => {
-        if (err) console.error(err);
+    db.query(query, (err) => {
+        if (err) raiseAnError(errorMessage, err);
     })
     
 }

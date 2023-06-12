@@ -1,80 +1,83 @@
 import { appendFile, writeFile } from "node:fs/promises";
 import { db, executeQuery } from "./getDbConnection.js";
-const getHistory = () => {
-
-}
-const handelDb = () => {
+import raiseAnError from "./utils/raiseAnError.js";
+const handelDb = async () => {
     let query =  `USE SCHOOLPROJECT`;
-    executeQuery(query, "failed to connect to db");
+    await executeQuery(query, "failed to connect to db");
 
     query = `
     LOAD DATA LOCAL INFILE './csv/employee.csv' 
     INTO TABLE employees FIELDS TERMINATED BY ','
     (employee_id, firstname, lastname, salary, hiring_date, firing_date, job_id)
-    `
-    executeQuery(query, "failed to populate employees")
+    `;
+    await executeQuery(query, "failed to populate employees");
 
     query = `DROP TABLE IF EXISTS SCHEDULEHISTORY`;
-    executeQuery(query, "failed to drop a table schdulehistory");
+    await executeQuery(query, "failed to drop a table schdulehistory");
     
     query = `CREATE TABLE SCHEDULEHISTORY (
         car_id INT NOT NULL,
         house_id INT NOT NULL,
         schedule_id INT NOT NULL,
         employee_id INT NOT NULL
-    )`
-    executeQuery(query, "failed to create schedulehisory table")
+    )`;
+    await executeQuery(query, "failed to create schedulehisory table");
 
 }
-handelDb();
 const getAllSchedules = () => {
-    let query = `USE SCHOOLPROJECT`
-    executeQuery(query)
+    handelDb();
+    let query = `USE SCHOOLPROJECT`;
+    executeQuery(query);
+    query = `SELECT * FROM schedule`;
 
-    query = `SELECT * FROM schedule`
     db.query(query, (err, data) => {
-        if  (err){
-            return console.error("failed to fetch data from schedule")
+        
+        if (err){
+            return raiseAnError("failed to fetch data from schedule");
         }
         getAllcars(
             {
                 schedule:data
-            })
+            });
     })
 }
 const getAllcars  = (obtainedData) => {
-    let query = `SELECT * FROM CARS`
+    let query = `SELECT * FROM CARS`;
+
     db.query(query, (err, data) => {
-        if (err) return console.error(err);
+        if (err) return raiseAnError(err);
         getHouses(
             {
                 ...obtainedData,
                 cars: data
-            })
+            });
     })
 }
 const getHouses = (obtainedData) => {
     let query = `SELECT * FROM HOUSE`;
     db.query(query, (err, data) => {
-        if (err) return  console.error(err)
+        if (err) return raiseAnError(err)
         getEmployees(
             {
                 ...obtainedData,
                 houses: data
-        })
+        });
     })
 }
 const getEmployees = async (obtainedData) => {
-    await writeFile("./csv/schduleHistory.csv", "") // drop\
+    await writeFile("./csv/schduleHistory.csv", "") // drop
+
     for await (const date of obtainedData.schedule) {
         const numberOfcars = Math.floor(Math.random() * 2) + 3;
-        const usedCars = []
+        const usedCars = [];
+
         for (let i = 0; i < numberOfcars; i++){
-            let randomCar = Math.floor(Math.random() * obtainedData.cars.length) + 1
-            while (usedCars.includes(randomCar)) randomCar = Math.floor(Math.random() * obtainedData.cars.length) + 1
-            usedCars.push(randomCar)
+            let randomCar = Math.floor(Math.random() * obtainedData.cars.length) + 1;
+
+            while (usedCars.includes(randomCar)) randomCar = Math.floor(Math.random() * obtainedData.cars.length) + 1;
+            usedCars.push(randomCar);
         }
-        await ObtainEmployees(date.date, usedCars, date.schedule_id, obtainedData.houses)
+        ObtainEmployees(date.date, usedCars, date.schedule_id, obtainedData.houses);
     }
 
 }
@@ -83,16 +86,19 @@ const ObtainEmployees = (date, usedCars, scheduleId, houses) => {
     SELECT * FROM employees
     WHERE hiring_date <= '${date}' AND (firing_date = "0000-00-00" OR firing_date > '${date}') AND job_id = 4 
     `// fetch id from jobs insted of hard coded later
+    
     db.query(query, (err, drivers) => {
-        if (err) return console.error(err)
+        
+        if (err) return raiseAnError(err);
         query = `
         SELECT * FROM employees
         WHERE hiring_date <= '${date}' AND (firing_date = "0000-00-00" OR firing_date > '${date}') AND job_id = 5
-        `
-        console.log(query);
+        `;
+
         db.query(query, (err, garbageMan) => {
-            if (err) return console.error(err)
-            console.log(garbageMan, "here");
+
+            if (err) 
+                return raiseAnError(err);
             createRecord(drivers, garbageMan, usedCars, scheduleId, houses)        
         })
     })
@@ -125,11 +131,11 @@ const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) =
                 await appendFile("./csv/schduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
             }
             catch(error){
-                return console.error(error)
+                return raiseAnError(error);
             }
         }
         
     }
 
 }
-getAllSchedules();
+export default getAllSchedules;

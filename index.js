@@ -1,7 +1,37 @@
-import  getAllHousingAssociation from "./getHousingAssociations.js"
+import fs from "fs";
+import getCars from "./getCars.js";
+import getJobs from "./getJobs.js";
 import getHouses from "./getHouses.js";
-import createHouseAssociation from "./getHouseAssociation.js";
-const getAllHousingAssociationRes =  await getAllHousingAssociation();
-if (getAllHousingAssociationRes.error) console.error("an error has occured")
-await getHouses(); // error handle by checking whether houses.csv exists
-// createHouseAssociation();
+import getSchedule from "./getSchedule.js";
+import getAllHousingAssociations from "./getHousingAssociations.js";
+import getAnAssociationForHouse from "./getHouseAssociation.js";
+import raiseAnError from "./utils/raiseAnError.js";
+import getAllSchedules from "./getScheduleHistory.js";
+const generate = async () => {
+    await getCars();
+    if (!fs.existsSync("./csv/cars.csv"))
+        return raiseAnError("failed getCars.js");
+    await getJobs();
+    await getHouses();
+    
+    if (!fs.existsSync("./csv/houses.csv"))
+        return raiseAnError("failed getHouses.js");
+    await getSchedule();
+    
+    if (!fs.existsSync("./csv/schedule.csv"))
+        return raiseAnError("failed getSchedule.js");
+    await getAllHousingAssociations();
+    
+    if (!fs.existsSync("./csv/houseAssociation.csv"))
+        return raiseAnError("failed getHousingAssociations.js");
+    await getAnAssociationForHouse();
+    
+    if (!fs.existsSync("./csv/house_Association.csv"))
+        return raiseAnError("failed getHouseAssociation.js");
+    await getAllSchedules();
+    
+    if (!fs.existsSync("./csv/schduleHistory.csv"))
+        return raiseAnError("failed getScheduleHistory.js");
+    
+}
+generate();
