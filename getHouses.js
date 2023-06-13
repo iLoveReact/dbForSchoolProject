@@ -16,10 +16,13 @@ const getHouses = async () => {
         const stringValues = line.toString().split(",")
         
         if (index > 1000) {
-            return createHousesCsv({
+            
+            createHousesCsv({
                 error: false,
                 data: values
             })
+            break;
+            
         }
         // 5 : adress, 7 : street 
         const numberOftenants = Math.floor(Math.random() * 100 + 1)

@@ -26,15 +26,17 @@ const createDb = async () => {
     query = "DROP TABLE IF EXISTS employees";
     await executeQuery(query, "failed to drop employees");
 
-    query = `CREATE TABLE IF NOT EXISTS employees (
+    query = `CREATE TABLE  employees (
         employee_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
         firstname VARCHAR(40) NOT NULL,
         lastname VARCHAR(50) NOT NULL,
         salary FLOAT NOT NULL,
         hiring_date VARCHAR(12) NOT NULL,
         firing_date VARCHAR(12) NULL,
-        job_id INT NOT NULL FOREIGN KEY REFERENCES Jobs(job_id)
-    )`;
+        job_id INT NOT NULL,
+    	FOREIGN KEY (job_id)
+        REFERENCES Jobs(job_id)
+    );`;
     await executeQuery(query, "failed to create employees table");
 }
 
@@ -69,8 +71,7 @@ const getDepartmentsAndEmployees = async () => {
             return startGeneration(availibleJobs,  manLastNames, manNames, womenLastNames, womenNames, splited) 
         })
     }
-
-
+    await executeQuery("use schoolproject", "failed to connect to db");
 }
 const startGeneration = (availibleJobs, manLastNames, manNames, womenLastNames, womenNames, splited) => {
     for (let job of availibleJobs) {
@@ -78,8 +79,8 @@ const startGeneration = (availibleJobs, manLastNames, manNames, womenLastNames, 
         let anotherMagicNumber = 3;
         
         if (job === "kierowca" || job === "ustawiac smietnikow") {
-            magicNumber = 37;
-            anotherMagicNumber = 7;
+            magicNumber = 17;
+            anotherMagicNumber = 25;
         }
 
         for (let i = 0; i < Math.floor( Math.random() * magicNumber ) + anotherMagicNumber; i++) {
@@ -115,7 +116,7 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
 
         const diff = Number(data[0].max_salary) - Number(data[0].min_salary);
         const salary = Math.ceil(Math.random() * diff) + Number(data[0].min_salary);
-        const date = new Date(2019, 5, 12).valueOf();
+        const date = new Date(2019, 1, 12).valueOf();
         const now = new Date().valueOf();
         let firingDate = "";
         let hiringDate = Math.floor(Math.random() * (now - date)) + date;

@@ -5,13 +5,6 @@ const handelDb = async () => {
     let query =  `USE SCHOOLPROJECT`;
     await executeQuery(query, "failed to connect to db");
 
-    query = `
-    LOAD DATA LOCAL INFILE './csv/employee.csv' 
-    INTO TABLE employees FIELDS TERMINATED BY ','
-    (employee_id, firstname, lastname, salary, hiring_date, firing_date, job_id)
-    `;
-    await executeQuery(query, "failed to populate employees");
-
     query = `DROP TABLE IF EXISTS SCHEDULEHISTORY`;
     await executeQuery(query, "failed to drop a table schdulehistory");
     
@@ -21,11 +14,10 @@ const handelDb = async () => {
         schedule_id INT NOT NULL,
         employee_id INT NOT NULL
     )`;
-    await executeQuery(query, "failed to create schedulehisory table");
-
+    await executeQuery(query, "failed to create schedulehistory table");
 }
-const getAllSchedules = () => {
-    handelDb();
+const getAllSchedules = async () => {
+    await handelDb();
     let query = `USE SCHOOLPROJECT`;
     executeQuery(query);
     query = `SELECT * FROM schedule`;
