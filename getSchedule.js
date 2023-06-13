@@ -14,12 +14,19 @@ const  getSchedule = async () => {
     while (startDate < endDate) {
         const splited = startDate.toLocaleString("en-GB").replaceAll("/","-").split(",")[0].split("-")
         const date = splited[2] + "-" + splited[1] + "-" + splited[0];
+
         fs.appendFileSync("./csv/schedule.csv", `${++index},${date}\n`, (err) => {
             if (err) raiseAnError("failed to write schedule.csv", err);
         })
         startDate.setDate(startDate.getDate() + 20);
     }
     
+    let query = `
+    LOAD DATA LOCAL INFILE './csv/schedule.csv' 
+    INTO TABLE Schedule FIELDS TERMINATED BY ','
+    (schedule_id, date)
+    `;
+    await executeQuery(query, "failed to populate schedule");
     
 }
 const createDb = async () => {
@@ -34,12 +41,5 @@ const createDb = async () => {
         date VARCHAR(23) 
     )`;
     await executeQuery(query, "failed to create table Schedule");
-
-    query = `
-    LOAD DATA LOCAL INFILE './csv/schedule.csv' 
-    INTO TABLE Schedule FIELDS TERMINATED BY ','
-    (schedule_id, date)
-    `;
-    await (query, "failed to populate cars");
 }
 export default getSchedule;

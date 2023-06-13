@@ -8,7 +8,10 @@ export const db = mysql.createConnection({
 
 export const executeQuery = async (query, errorMessage) => {
     db.query(query, (err) => {
-        if (err) raiseAnError(errorMessage, err);
+        if (err) return raiseAnError({
+            err,
+            errorMessage
+        });
     })
     
 }
