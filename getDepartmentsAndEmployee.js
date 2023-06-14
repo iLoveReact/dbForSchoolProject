@@ -80,7 +80,7 @@ const startGeneration = (availibleJobs, manLastNames, manNames, womenLastNames, 
         
         if (job === "kierowca" || job === "ustawiac smietnikow") {
             magicNumber = 17;
-            anotherMagicNumber = 25;
+            anotherMagicNumber = 35;
         }
 
         for (let i = 0; i < Math.floor( Math.random() * magicNumber ) + anotherMagicNumber; i++) {
@@ -101,7 +101,7 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
     `;
 
     db.query(query, async (err, data) => {
-        if (err) return raiseAnError(err); //ultimate error handler 
+        if (err) return raiseAnError(err);
         let gender = Math.floor(Math.random() * 100);
         let firstName = "";
         let lastName = "";
@@ -120,6 +120,7 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
         const now = new Date().valueOf();
         let firingDate = "";
         let hiringDate = Math.floor(Math.random() * (now - date)) + date;
+        if (jobId == 4 || jobId == 5) hiringDate = Math.floor(Math.random() * 1000) + new Date(2012, 4, 4).valueOf()
         let randomNumber = Math.floor(Math.random() * 100);
 
         if (randomNumber % 4 === 0) {
@@ -144,6 +145,11 @@ const createEmployee = async (firstName, lastName, salary, hiringDate, firingDat
         if (err) return raiseAnError("failed to append to employee.csv");
         createWorkIn(deparmentIndex)
     })
+    let query = `INSERT INTO employees
+    (employee_id, firstname, lastname, salary, hiring_date, firing_date, job_id)
+    VALUES (${employeeIndex}, "${firstName}", "${lastName}", ${salary},"${hiringDate}" ,"${firingDate}" ,${jobId})
+    `
+    await executeQuery(query, "failed to insert employee into employees table");
 }
 const createWorkIn = async(deparmentIndex) => {
     fs.appendFile("./csv/worksIn.csv", `${employeeIndex},${deparmentIndex}\n`, (err) => {

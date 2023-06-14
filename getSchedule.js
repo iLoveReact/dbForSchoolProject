@@ -5,7 +5,7 @@ const  getSchedule = async () => {
     await createDb();
     let startDate = new Date(2019, 11, 29);
     let index = 0;
-    const endDate = new Date();
+    const endDate = new Date(2022,1,1);
 
     fs.writeFile("./csv/schedule.csv", "" , (err) => {
         if (err) console.error("failed to drop a schedule.csv", err)

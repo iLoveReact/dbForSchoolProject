@@ -15,6 +15,7 @@ const handelDb = async () => {
         employee_id INT NOT NULL
     )`;
     await executeQuery(query, "failed to create schedulehistory table");
+    
 }
 const getAllSchedules = async () => {
     await handelDb();
@@ -76,7 +77,7 @@ const getEmployees = async (obtainedData) => {
 const ObtainEmployees = (date, usedCars, scheduleId, houses) => {
     let query = `
     SELECT * FROM employees
-    WHERE hiring_date <= '${date}' AND (firing_date = "0000-00-00" OR firing_date > '${date}') AND job_id = 4 
+    WHERE hiring_date <= '${date}' AND (firing_date is null OR firing_date > '${date}') AND job_id = 4 
     `// fetch id from jobs insted of hard coded later
     
     db.query(query, (err, drivers) => {
@@ -84,7 +85,7 @@ const ObtainEmployees = (date, usedCars, scheduleId, houses) => {
         if (err) return raiseAnError(err);
         query = `
         SELECT * FROM employees
-        WHERE hiring_date <= '${date}' AND (firing_date = "0000-00-00" OR firing_date > '${date}') AND job_id = 5
+        WHERE hiring_date <= '${date}' AND (firing_date is null OR firing_date > '${date}') AND job_id = 5
         `;
 
         db.query(query, (err, garbageMan) => {
