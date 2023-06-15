@@ -6,7 +6,6 @@ const getAllHousingAssociation = async () => {
     const result = [];
     const browser = await puppeteer.launch({headless: true});
     const page = await browser.newPage();
-    let error = false;
     
     await page.goto(
     'https://www.samconveyancing.co.uk/news/conveyancing/list-of-housing-associations-in-london-4384',

@@ -28,9 +28,6 @@ const generate = async () => {
     if (!fs.existsSync("./csv/houseAssociation.csv"))
         return raiseAnError("failed getHousingAssociations.js");
     await getAnAssociationForHouse();
-    
-    if (!fs.existsSync("./csv/house_Association.csv"))
-        return raiseAnError("failed getHouseAssociation.js");
     await getDepartmentsAndEmployees();
 
     if (!fs.existsSync("./csv/employee.csv"))
@@ -39,6 +36,7 @@ const generate = async () => {
     
     if (!fs.existsSync("./csv/schduleHistory.csv"))
         return raiseAnError("failed getScheduleHistory.js");
+    console.log("finished");
     
 }
 await generate();

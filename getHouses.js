@@ -47,7 +47,7 @@ const createHousesCsv = (values) => {
     })
     for (const line of values.data) {
         fs.appendFile("./csv/houses.csv", line.join(",") + "\n", (err) => {
-            return raiseAnError(err);
+            if (err) return raiseAnError(err);
         });
     }
     let query = `

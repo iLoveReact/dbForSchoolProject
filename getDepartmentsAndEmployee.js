@@ -50,10 +50,10 @@ const getDepartmentsAndEmployees = async () => {
     const {manLastNames, manNames, womenLastNames, womenNames} = others
 
     fs.writeFile("./csv/employee.csv", "", (err) => {
-        console.error(err);
+        if (err) console.error(err);
     })
     fs.writeFile("./csv/worksIn.csv", "", (err) => {
-        console.error(err);
+        if(err) console.error(err);
     })
 
     executeQuery(`USE schoolProject`, "failed to use schoolPero");
@@ -66,7 +66,7 @@ const getDepartmentsAndEmployees = async () => {
         let query = `INSERT INTO departments (dep_id, dep_name) VALUES (?)`;
         
         db.query(query, [[splited[0], splited[1]]], (err) => {
-            if (err) return raiseAnError(err); // add ultimate error
+            if (err) return raiseAnError(err); 
             const availibleJobs = splited[2].replace("[", "").replace("]", "").split(",");
             return startGeneration(availibleJobs,  manLastNames, manNames, womenLastNames, womenNames, splited) 
         })
@@ -124,8 +124,13 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
         let randomNumber = Math.floor(Math.random() * 100);
 
         if (randomNumber % 4 === 0) {
-            firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate);
-            firingDate = firingDate.toLocaleString("en-GB").replaceAll("/", "-").split(",")[0];
+            if (hiringDate < new Date(2019, 1, 1)){
+                firingDate = new Date(Math.floor(Math.random() * (now - new Date(2019, 1, 1).valueOf())) + new Date(2019, 1, 1).valueOf());
+                firingDate = firingDate.toLocaleString("en-GB").replaceAll("/", "-").split(",")[0];
+            }else{
+                firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate);
+                firingDate = firingDate.toLocaleString("en-GB").replaceAll("/", "-").split(",")[0];   
+            }
             const splited = firingDate.split("-");
             firingDate = splited[2] + "-" + splited[1] + "-" + splited[0];
         }
