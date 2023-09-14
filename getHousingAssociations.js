@@ -21,7 +21,7 @@ const getAllHousingAssociation = async () => {
     })
 
     for (const element of elements){
-        const value = await element.evaluate(e => e.textContent)
+        const value = await element.evaluate(e => e.textContent);
         
         if (!isNaN(value[0])) break;
         result.push(value);

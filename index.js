@@ -8,7 +8,6 @@ import getAnAssociationForHouse from "./getHouseAssociation.js";
 import raiseAnError from "./utils/raiseAnError.js";
 import getAllSchedules from "./getScheduleHistory.js";
 import getDepartmentsAndEmployees from "./getDepartmentsAndEmployee.js";
-import { executeQuery, db } from "./getDbConnection.js";
 const generate = async () => {
     await getHouses();
     
@@ -16,25 +15,30 @@ const generate = async () => {
         return raiseAnError("failed getHouses.js");
 
     await getCars();
+    
     if (!fs.existsSync("./csv/cars.csv"))
         return raiseAnError("failed getCars.js");
+    
     await getJobs();
     await getSchedule();
     
     if (!fs.existsSync("./csv/schedule.csv"))
         return raiseAnError("failed getSchedule.js");
-    await getAllHousingAssociations();
+    
+        await getAllHousingAssociations();
     
     if (!fs.existsSync("./csv/houseAssociation.csv"))
         return raiseAnError("failed getHousingAssociations.js");
+    
     await getAnAssociationForHouse();
     await getDepartmentsAndEmployees();
 
     if (!fs.existsSync("./csv/employee.csv"))
         return raiseAnError("failed getDepartmentsAndEmployees.js");
+    
     await getAllSchedules();
     
-    if (!fs.existsSync("./csv/schduleHistory.csv"))
+    if (!fs.existsSync("./csv/scheduleHistory.csv"))
         return raiseAnError("failed getScheduleHistory.js");
     console.log("finished");
     

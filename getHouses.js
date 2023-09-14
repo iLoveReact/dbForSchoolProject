@@ -16,7 +16,6 @@ const getHouses = async () => {
         const stringValues = line.toString().split(",")
         
         if (index > 1000) {
-            
             createHousesCsv({
                 error: false,
                 data: values
@@ -41,10 +40,12 @@ const getHouses = async () => {
 }
 
 const createHousesCsv = (values) => {
+    
     if (values.error) return raiseAnError(values.message);
     fs.writeFile("./csv/houses.csv","", (err) => { //drop 
         if (err) console.error(err);
     })
+
     for (const line of values.data) {
         fs.appendFile("./csv/houses.csv", line.join(",") + "\n", (err) => {
             if (err) return raiseAnError(err);
