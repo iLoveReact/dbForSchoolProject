@@ -36,8 +36,10 @@ const getCars =  async () => {
     });     
 
     const titles = await page.$$(".product-component__title");
+    
     fs.writeFile("./csv/cars.csv", "", (err) => {
-        if (err) return raiseAnError(err);
+        if (err) 
+            return raiseAnError(err);
     });
 
     for (const title of titles) {
@@ -51,7 +53,8 @@ const getCars =  async () => {
             
             fs.appendFile(
                 "./csv/cars.csv", `${++index},${model},${status},${volume}\n`, (err) => {
-                    if (err) raiseAnError(err);
+                    if (err)
+                        raiseAnError(err);
                 }
             )
         }

@@ -6,7 +6,6 @@ const getAllHousingAssociation = async () => {
     const result = [];
     const browser = await puppeteer.launch({headless: true});
     const page = await browser.newPage();
-    let error = false;
     
     await page.goto(
     'https://www.samconveyancing.co.uk/news/conveyancing/list-of-housing-associations-in-london-4384',
@@ -22,7 +21,7 @@ const getAllHousingAssociation = async () => {
     })
 
     for (const element of elements){
-        const value = await element.evaluate(e => e.textContent)
+        const value = await element.evaluate(e => e.textContent);
         
         if (!isNaN(value[0])) break;
         result.push(value);

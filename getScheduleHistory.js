@@ -28,10 +28,9 @@ const getAllSchedules = async () => {
         if (err){
             return raiseAnError("failed to fetch data from schedule");
         }
-        getAllcars(
-            {
-                schedule:data
-            });
+        getAllcars({
+            schedule: data
+        });
     })
 }
 const getAllcars  = (obtainedData) => {
@@ -58,7 +57,7 @@ const getHouses = (obtainedData) => {
     })
 }
 const getEmployees = async (obtainedData) => {
-    await writeFile("./csv/schduleHistory.csv", "") // drop
+    await writeFile("./csv/scheduleHistory.csv", ""); // drop
 
     for await (const date of obtainedData.schedule) {
         const numberOfcars = Math.floor(Math.random() * 2) + 3;
@@ -78,7 +77,7 @@ const ObtainEmployees = (date, usedCars, scheduleId, houses) => {
     let query = `
     SELECT * FROM employees
     WHERE hiring_date <= '${date}' AND (firing_date is null OR firing_date > '${date}') AND job_id = 4 
-    `// fetch id from jobs insted of hard coded later
+    `// fetch id from jobs insted of hard coded later 4 and 5 are those majorities neccessary for the business
     
     db.query(query, (err, drivers) => {
         
@@ -92,7 +91,7 @@ const ObtainEmployees = (date, usedCars, scheduleId, houses) => {
 
             if (err) 
                 return raiseAnError(err);
-            createRecord(drivers, garbageMan, usedCars, scheduleId, houses)        
+            createRecord(drivers, garbageMan, usedCars, scheduleId, houses);     
         })
     })
     
@@ -103,10 +102,10 @@ const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) =
 
     for (const car of usedCars) {
         let randomDriver = Math.floor(Math.random() * drivers.length)
-        let randomGarbageMan = Math.floor(Math.random() * garbageMan.length)
+        let randomGarbageMan = Math.floor(Math.random() * garbageMan.length) // chosse random driver and garbage man
         
         while (usedEmployees.includes(drivers[randomDriver].employee_id)) 
-            randomDriver = Math.floor(Math.random() * drivers.length);
+            randomDriver = Math.floor(Math.random() * drivers.length); // checking for duplicates
         
         while (usedEmployees.includes(garbageMan[randomGarbageMan].employee_id))
             randomGarbageMan = Math.floor(Math.random() * garbageMan.length);
@@ -117,11 +116,12 @@ const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) =
 
         for (let index = 0; index < randomNumberOfHouses; index++){
             let randomHouse = Math.floor(Math.random() * houses.length)
-            while (usedHouses.includes(randomHouse)) randomHouse = Math.floor(Math.random() * houses.length)
+            
+            while (usedHouses.includes(randomHouse)) randomHouse = Math.floor(Math.random() * houses.length); // checking for duplicates
 
             try {    
-                await appendFile("./csv/schduleHistory.csv", `${drivers[randomDriver].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
-                await appendFile("./csv/schduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
+                await appendFile("./csv/scheduleHistory.csv", `${drivers[randomDriver].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
+                await appendFile("./csv/scheduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
             }
             catch(error){
                 return raiseAnError(error);

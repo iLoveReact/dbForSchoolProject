@@ -1,5 +1,5 @@
 import { db, executeQuery } from "./getDbConnection.js";
-import fs, { createReadStream } from "fs";
+import fs from "fs";
 import { readFile } from "node:fs/promises";
 import readline from "readline";
 import raiseAnError from "./utils/raiseAnError.js";
@@ -47,14 +47,14 @@ const getDepartmentsAndEmployees = async () => {
     if (error) {
         return raiseAnError(others.msg)
     }
-    const {manLastNames, manNames, womenLastNames, womenNames} = others
+    const {manLastNames, manNames, womenLastNames, womenNames} = others;
 
     fs.writeFile("./csv/employee.csv", "", (err) => {
-        console.error(err);
-    })
+        if (err) console.error(err);
+    }) // drop
     fs.writeFile("./csv/worksIn.csv", "", (err) => {
-        console.error(err);
-    })
+        if (err) console.error(err);
+    }) // drop
 
     executeQuery(`USE schoolProject`, "failed to use schoolPero");
     const reader = readline.createInterface({
@@ -66,7 +66,11 @@ const getDepartmentsAndEmployees = async () => {
         let query = `INSERT INTO departments (dep_id, dep_name) VALUES (?)`;
         
         db.query(query, [[splited[0], splited[1]]], (err) => {
-            if (err) return raiseAnError(err); // add ultimate error
+            
+            if (err)
+                return raiseAnError(err); 
+            
+            //replaces due to the fact that all jobs are stored in array
             const availibleJobs = splited[2].replace("[", "").replace("]", "").split(",");
             return startGeneration(availibleJobs,  manLastNames, manNames, womenLastNames, womenNames, splited) 
         })
@@ -74,11 +78,13 @@ const getDepartmentsAndEmployees = async () => {
     await executeQuery("use schoolproject", "failed to connect to db");
 }
 const startGeneration = (availibleJobs, manLastNames, manNames, womenLastNames, womenNames, splited) => {
+    
     for (let job of availibleJobs) {
         let magicNumber = 8;
-        let anotherMagicNumber = 3;
+        let anotherMagicNumber = 3; // numbers used to randomize number of employees
         
         if (job === "kierowca" || job === "ustawiac smietnikow") {
+            // the majority of workers should have one of the two titles
             magicNumber = 17;
             anotherMagicNumber = 35;
         }
@@ -87,7 +93,9 @@ const startGeneration = (availibleJobs, manLastNames, manNames, womenLastNames, 
             let query = `SELECT job_id FROM JOBS WHERE job_title = '${job}'`;
             
             db.query(query, (err, data) => {
-                if (err) return raiseAnError(err);
+                
+                if (err)
+                    return raiseAnError(err);
                 return getJobDetails(job, manNames, manLastNames, womenLastNames, womenNames, splited[0], data[0].job_id);
             })
 
@@ -101,7 +109,9 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
     `;
 
     db.query(query, async (err, data) => {
+        
         if (err) return raiseAnError(err);
+        
         let gender = Math.floor(Math.random() * 100);
         let firstName = "";
         let lastName = "";
@@ -120,12 +130,20 @@ const getJobDetails = async (job, manNames, manLastNames, womenLastNames, womenN
         const now = new Date().valueOf();
         let firingDate = "";
         let hiringDate = Math.floor(Math.random() * (now - date)) + date;
-        if (jobId == 4 || jobId == 5) hiringDate = Math.floor(Math.random() * 1000) + new Date(2012, 4, 4).valueOf()
+
+        if (jobId == 4 || jobId == 5)
+            hiringDate = Math.floor(Math.random() * 1000) + new Date(2012, 4, 4).valueOf()
         let randomNumber = Math.floor(Math.random() * 100);
 
         if (randomNumber % 4 === 0) {
-            firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate);
-            firingDate = firingDate.toLocaleString("en-GB").replaceAll("/", "-").split(",")[0];
+            // replaces due to the fact how mariaDb sorts strings
+            if (hiringDate < new Date(2019, 1, 1)) {
+                firingDate = new Date(Math.floor(Math.random() * (now - new Date(2019, 1, 1).valueOf())) + new Date(2019, 1, 1).valueOf());
+                firingDate = firingDate.toLocaleString("en-GB").replaceAll("/", "-").split(",")[0];
+            } else {
+                firingDate = new Date(Math.floor(Math.random() * (now - hiringDate)) + hiringDate);
+                firingDate = firingDate.toLocaleString("en-GB").replaceAll("/", "-").split(",")[0];   
+            }
             const splited = firingDate.split("-");
             firingDate = splited[2] + "-" + splited[1] + "-" + splited[0];
         }
@@ -142,7 +160,8 @@ const createEmployee = async (firstName, lastName, salary, hiringDate, firingDat
     employeeIndex++;
 
     fs.appendFile("./csv/employee.csv", `${employeeIndex},${firstName},${lastName},${salary},${hiringDate},${firingDate},${jobId}\n`, (err) => {
-        if (err) return raiseAnError("failed to append to employee.csv");
+        if (err)
+            return raiseAnError("failed to append to employee.csv");
         createWorkIn(deparmentIndex)
     })
     let query = `INSERT INTO employees
@@ -153,14 +172,15 @@ const createEmployee = async (firstName, lastName, salary, hiringDate, firingDat
 }
 const createWorkIn = async(deparmentIndex) => {
     fs.appendFile("./csv/worksIn.csv", `${employeeIndex},${deparmentIndex}\n`, (err) => {
-        if (err) return raiseAnError(err); 
+        if (err)
+            return raiseAnError(err); 
     })
 }
 const readNames = async () => {
     try {
-        const manNames = (await readFile(pathManNames, "utf8")).toString().split("\n")
-        const womenNames = (await readFile(pathWomenNames, "utf8")).toString().split("\n")
-        const manLastNames = (await readFile(pathManLastNames, "utf8")).toString().split("\n")
+        const manNames = (await readFile(pathManNames, "utf8")).toString().split("\n");
+        const womenNames = (await readFile(pathWomenNames, "utf8")).toString().split("\n");
+        const manLastNames = (await readFile(pathManLastNames, "utf8")).toString().split("\n");
         const womenLastNames = (await readFile(pathWomenLastNames, "utf8")).toString().split("\n");
         return {
             error:false,

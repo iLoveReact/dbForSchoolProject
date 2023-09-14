@@ -12,7 +12,7 @@ const  getSchedule = async () => {
     })
 
     while (startDate < endDate) {
-        const splited = startDate.toLocaleString("en-GB").replaceAll("/","-").split(",")[0].split("-")
+        const splited = startDate.toLocaleString("en-GB").replaceAll("/","-").split(",")[0].split("-") // replacing due to the mariaDb string sort
         const date = splited[2] + "-" + splited[1] + "-" + splited[0];
 
         fs.appendFileSync("./csv/schedule.csv", `${++index},${date}\n`, (err) => {

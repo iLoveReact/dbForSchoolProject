@@ -34,7 +34,7 @@ const createRelation = (houseAss, streets) => {
         categorization.push(category);
     }
     fs.writeFile("./csv/house_Association.csv","", (err) => { //drop 
-        return console.error(err);
+        if (err) return console.error(err);
     })
     for (let index = 0; index < categorization.length; index++){
         let query = `
