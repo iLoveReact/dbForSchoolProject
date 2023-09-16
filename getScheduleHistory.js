@@ -47,9 +47,9 @@ const getAllcars  = (obtainedData) => {
 }
 const getHouses = (obtainedData) => {
     let query = `SELECT * FROM HOUSE`;
-    db.query(query, (err, data) => {
+    db.query(query, async (err, data) => {
         if (err) return raiseAnError(err)
-        getEmployees(
+        await getEmployees(
             {
                 ...obtainedData,
                 houses: data
@@ -77,21 +77,22 @@ const ObtainEmployees = (date, usedCars, scheduleId, houses) => {
     let query = `
     SELECT * FROM employees
     WHERE hiring_date <= '${date}' AND (firing_date is null OR firing_date > '${date}') AND job_id = 4 
-    `// fetch id from jobs insted of hard coded later 4 and 5 are those majorities neccessary for the business
+    `;// fetch id from jobs insted of hard coded later 4 and 5 are those majorities neccessary for the business
     
     db.query(query, (err, drivers) => {
         
-        if (err) return raiseAnError(err);
+        if (err) 
+            return raiseAnError(err);
         query = `
         SELECT * FROM employees
         WHERE hiring_date <= '${date}' AND (firing_date is null OR firing_date > '${date}') AND job_id = 5
         `;
 
-        db.query(query, (err, garbageMan) => {
+        db.query(query, async (err, garbageMan) => {
 
             if (err) 
                 return raiseAnError(err);
-            createRecord(drivers, garbageMan, usedCars, scheduleId, houses);     
+            await createRecord(drivers, garbageMan, usedCars, scheduleId, houses);     
         })
     })
     
@@ -101,8 +102,8 @@ const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) =
     const usedHouses  = [];
 
     for (const car of usedCars) {
-        let randomDriver = Math.floor(Math.random() * drivers.length)
-        let randomGarbageMan = Math.floor(Math.random() * garbageMan.length) // chosse random driver and garbage man
+        let randomDriver = Math.floor(Math.random() * drivers.length);
+        let randomGarbageMan = Math.floor(Math.random() * garbageMan.length); // chosse random driver and garbage man
         
         while (usedEmployees.includes(drivers[randomDriver].employee_id)) 
             randomDriver = Math.floor(Math.random() * drivers.length); // checking for duplicates
@@ -110,18 +111,18 @@ const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) =
         while (usedEmployees.includes(garbageMan[randomGarbageMan].employee_id))
             randomGarbageMan = Math.floor(Math.random() * garbageMan.length);
 
-        usedEmployees.push(drivers[randomDriver].employee_id)
-        usedEmployees.push(garbageMan[randomGarbageMan].employee_id)
-        const randomNumberOfHouses = Math.floor(Math.random() * houses.length)
+        usedEmployees.push(drivers[randomDriver].employee_id);
+        usedEmployees.push(garbageMan[randomGarbageMan].employee_id);
+        const randomNumberOfHouses = Math.floor(Math.random() * houses.length);
 
         for (let index = 0; index < randomNumberOfHouses; index++){
-            let randomHouse = Math.floor(Math.random() * houses.length)
+            let randomHouse = Math.floor(Math.random() * houses.length);
             
             while (usedHouses.includes(randomHouse)) randomHouse = Math.floor(Math.random() * houses.length); // checking for duplicates
 
             try {    
-                await appendFile("./csv/scheduleHistory.csv", `${drivers[randomDriver].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
-                await appendFile("./csv/scheduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`)
+                await appendFile("./csv/scheduleHistory.csv", `${drivers[randomDriver].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`);
+                await appendFile("./csv/scheduleHistory.csv", `${garbageMan[randomGarbageMan].employee_id},${car},${houses[randomHouse].house_id},${scheduleId}\n`);
             }
             catch(error){
                 return raiseAnError(error);
@@ -131,4 +132,4 @@ const createRecord = async (drivers, garbageMan, usedCars, scheduleId, houses) =
     }
 
 }
-export default getAllSchedules;
+export default getAllSchedules; 

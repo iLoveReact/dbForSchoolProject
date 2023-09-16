@@ -27,6 +27,7 @@ const createRelation = (houseAss, streets) => {
         const category = [];
         
         for (let j = 0; j < partition; j++) {
+            
             if (i * partition + j < streets.length){
                 category.push(streets[i * partition + j].street)
             }
@@ -42,6 +43,7 @@ const createRelation = (houseAss, streets) => {
         WHERE street in ?
         `;
         db.query(query, [[categorization[index]]], (err, data) => {
+            
             if (err) return raiseAnError(err);
             const houseAssociatioIndex = index + 1;
 

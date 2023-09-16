@@ -8,6 +8,9 @@ import getAnAssociationForHouse from "./getHouseAssociation.js";
 import raiseAnError from "./utils/raiseAnError.js";
 import getAllSchedules from "./getScheduleHistory.js";
 import getDepartmentsAndEmployees from "./getDepartmentsAndEmployee.js";
+const sleep = (milliseconds) => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
 const generate = async () => {
     await getHouses();
     
@@ -37,7 +40,7 @@ const generate = async () => {
         return raiseAnError("failed getDepartmentsAndEmployees.js");
     
     await getAllSchedules();
-    
+    await sleep(1000);
     if (!fs.existsSync("./csv/scheduleHistory.csv"))
         return raiseAnError("failed getScheduleHistory.js");
     console.log("finished");

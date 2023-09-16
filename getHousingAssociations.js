@@ -17,7 +17,7 @@ const getAllHousingAssociation = async () => {
     let index = 0;
 
     writeFile("./csv/houseAssociation.csv", "", (err) => { // drop 
-        if (err)console.error(err);
+        if (err) console.error(err);
     })
 
     for (const element of elements){

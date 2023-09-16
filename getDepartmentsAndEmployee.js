@@ -41,11 +41,11 @@ const createDb = async () => {
 }
 
 const getDepartmentsAndEmployees = async () => {
-    await createDb()
+    await createDb();
     const { error, ...others } = await readNames();
     
     if (error) {
-        return raiseAnError(others.msg)
+        return raiseAnError(others.msg);
     }
     const {manLastNames, manNames, womenLastNames, womenNames} = others;
 
@@ -72,7 +72,7 @@ const getDepartmentsAndEmployees = async () => {
             
             //replaces due to the fact that all jobs are stored in array
             const availibleJobs = splited[2].replace("[", "").replace("]", "").split(",");
-            return startGeneration(availibleJobs,  manLastNames, manNames, womenLastNames, womenNames, splited) 
+            return startGeneration(availibleJobs,  manLastNames, manNames, womenLastNames, womenNames, splited);
         })
     }
     await executeQuery("use schoolproject", "failed to connect to db");
@@ -162,12 +162,12 @@ const createEmployee = async (firstName, lastName, salary, hiringDate, firingDat
     fs.appendFile("./csv/employee.csv", `${employeeIndex},${firstName},${lastName},${salary},${hiringDate},${firingDate},${jobId}\n`, (err) => {
         if (err)
             return raiseAnError("failed to append to employee.csv");
-        createWorkIn(deparmentIndex)
+        createWorkIn(deparmentIndex);
     })
     let query = `INSERT INTO employees
     (employee_id, firstname, lastname, salary, hiring_date, firing_date, job_id)
     VALUES (${employeeIndex}, "${firstName}", "${lastName}", ${salary},"${hiringDate}" ,"${firingDate}" ,${jobId})
-    `
+    `;
     await executeQuery(query, "failed to insert employee into employees table");
 }
 const createWorkIn = async(deparmentIndex) => {

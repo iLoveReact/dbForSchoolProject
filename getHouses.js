@@ -7,7 +7,7 @@ const getHouses = async () => {
     createDb();
     const values = [];
     let index = -1;
-    const stream = fs.createReadStream("./csv/streetsOfNYC.csv")
+    const stream = fs.createReadStream("./csv/streetsOfNYC.csv");
     const lineReader = readline.createInterface({
         input:stream
     })
